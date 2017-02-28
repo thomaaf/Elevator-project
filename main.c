@@ -23,7 +23,8 @@ int main() {
     }
 
     printf("Press STOP button to stop elevator and exit program.\n");
-
+    printf("Hello there, I'm here to make u confused")
+	
     elev_set_motor_direction(DIRN_STOP);
 
     while (1) {
