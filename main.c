@@ -1,5 +1,18 @@
 #include "elev.h"
 #include <stdio.h>
+#include "eventmanager.h"
+
+
+
+
+
+void isButtonPressed( void );
+void atFloor(void);
+//void ifStop(void);
+
+
+
+
 
 
 int main() {
@@ -11,22 +24,33 @@ int main() {
 
     printf("Press STOP button to stop elevator and exit program.\n");
 
-    elev_set_motor_direction(DIRN_UP);
+    elev_set_motor_direction(DIRN_STOP);
 
     while (1) {
-        // Change direction when we reach top/bottom floor
-        if (elev_get_floor_sensor_signal() == N_FLOORS - 1) {
-            elev_set_motor_direction(DIRN_DOWN);
-        } else if (elev_get_floor_sensor_signal() == 0) {
-            elev_set_motor_direction(DIRN_UP);
-        }
+    	isButtonPressed();
+    	atFloor();
+    	//ifStop();
 
-        // Stop elevator and exit program if the stop button is pressed
-        if (elev_get_stop_signal()) {
-            elev_set_motor_direction(DIRN_STOP);
-            break;
-        }
     }
 
     return 0;
 }
+
+
+
+void isButtonPressed(){
+	for (int floor=0; floor<4; floor++ ){
+		for (int button=0; button<3; button++){ //USe enum instead of numbers to be sure whiovh floor is being called
+			if (!(button == BUTTON_CALL_UP && floor == N_FLOORS - 1)&&(!(button == BUTTON_CALL_DOWN && floor == 0))){
+				if (elev_get_button_signal( button, floor)==1){
+					emButtonPressed(floor, button);
+					
+				}
+			}
+
+		}
+	}
+
+}
+
+Void atFloor()
