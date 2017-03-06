@@ -29,13 +29,13 @@ int main() {
     while (1) {
     	//newOrder();
     	//atFloor();
+        //ifstop();
     	
 
     }
 
     return 0;
 }
-
 
 
 void newOrder(){
@@ -58,3 +58,9 @@ void atFloor(){
     }
 }
 
+void ifStop(){ //bruke annet navn?
+    if (elev_get_stop_signal==1){
+        emStopButton();
+
+    }
+}
