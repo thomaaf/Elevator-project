@@ -22,16 +22,18 @@ int main() {
     }
 
     printf("Press STOP button to stop elevator and exit program.\n");
-    printf("Hello there, I'm here to make u confused");
+    emprintshit();
+
 	
-    elev_set_motor_direction(DIRN_UP);
+    elev_set_motor_direction(DIRN_STOP);
 
     while (1) {
+
     	newOrder();
     	atFloor();
-        ifstop();
+        ifStop();
         emCheckTimer();
-    	
+  
 
     }
 
@@ -54,13 +56,20 @@ void newOrder(){
 
 }
 void atFloor(){
-    if ((elev_get_floor_sensor_signal()>-1))&&(elev_get_floor_sensor_signal()!=PrevFloor){ //BE WARE HERE
-        emFloorControl(elev_get_floor_sensor_signal());
-    }
+
+        if (elev_get_floor_sensor_signal()==-1){
+        	intransition =1; 
+        }
+        else if (elev_get_floor_sensor_signal()!=-1){
+        	emFloorControl(elev_get_floor_sensor_signal());
+        	intransition=0;
+        }
+        
+ 
 }
 
 void ifStop(){ //bruke annet navn?
-    if (elev_get_stop_signal==1){
+    if (elev_get_stop_signal()==1){
         emStopButton();
 
     }

@@ -1,6 +1,6 @@
-void lights_indicator_floor_lights(int floor);
+void lightsIndicatorFloorLights(int floor);
 
-void lightsSetButtonLight (int floor, int button);
+void lightsSetOrderButtonLight (int floor, int button);
 
-void lightsClearButtonLight(int floor, int button);
+void lightsClearOrderButtonLight(int floor, int button);
 
