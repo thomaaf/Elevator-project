@@ -6,8 +6,8 @@
 
 void newOrder( void );
 void atFloor(void);
-//void order();
-//void ifStop(void);
+void ifStop(void);
+int PrevFloor=-1;
 
 
 
@@ -27,9 +27,10 @@ int main() {
     elev_set_motor_direction(DIRN_UP);
 
     while (1) {
-    	//newOrder();
-    	//atFloor();
-        //ifstop();
+    	newOrder();
+    	atFloor();
+        ifstop();
+        emCheckTimer();
     	
 
     }
@@ -53,8 +54,8 @@ void newOrder(){
 
 }
 void atFloor(){
-    if (elev_get_floor_sensor_signal()>-1){
-        emElevatorFeedBack(elev_get_floor_sensor_signal());
+    if ((elev_get_floor_sensor_signal()>-1))&&(elev_get_floor_sensor_signal()!=PrevFloor){ //BE WARE HERE
+        emFloorControl(elev_get_floor_sensor_signal());
     }
 }
 

@@ -1,12 +1,14 @@
 
 
 void emQueueUpdater( int pressedFloor, int pressedButton );
-void emElevatorFeedBack(int newFloor);
-void emExecutePriorityOrder(int pressedFloor,int pressedButton);
-void EMDoorControl();
+void emStatemachine (int pressedFloor, int pressedButton);
+void emFloorControl(int newFloor);
+void queuecheck();
+void emSetEngine(int direction);
+void emDoorControl(int floor);
 void emStopButton();
-//void emCheckForMatch(int floor);
-//void emmatchFound();
+void emToggleTimer(int active );
+int emCheckTimer();
 
 
 
