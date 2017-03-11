@@ -9,7 +9,7 @@ LDFLAGS = -lcomedi -lm
 
 # list of sources
 
-ELEVSRC = elev.c io.c main.c
+ELEVSRC = elev.c io.c main.c eventmanager.c assets.c lights.c
 
 
 # program executable file name.

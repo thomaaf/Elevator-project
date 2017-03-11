@@ -4,11 +4,10 @@
 
 
 
-
-
-void isButtonPressed( void );
+void newOrder( void );
 void atFloor(void);
-//void ifStop(void);
+void ifStop(void);
+int PrevFloor=-1;
 
 
 
@@ -23,14 +22,18 @@ int main() {
     }
 
     printf("Press STOP button to stop elevator and exit program.\n");
-    printf("Hello there, I'm here to make u confused")
+    emprintshit();
+
 	
     elev_set_motor_direction(DIRN_STOP);
 
     while (1) {
-    	isButtonPressed();
+
+    	newOrder();
     	atFloor();
-    	//ifStop();
+        ifStop();
+        emCheckTimer();
+  
 
     }
 
@@ -38,13 +41,12 @@ int main() {
 }
 
 
-
-void isButtonPressed(){
+void newOrder(){
 	for (int floor=0; floor<4; floor++ ){
 		for (int button=0; button<3; button++){ //USe enum instead of numbers to be sure whiovh floor is being called
 			if (!(button == BUTTON_CALL_UP && floor == N_FLOORS - 1)&&(!(button == BUTTON_CALL_DOWN && floor == 0))){
 				if (elev_get_button_signal( button, floor)==1){
-					emButtonPressed(floor, button);
+					emQueueUpdater(floor, button);
 					
 				}
 			}
@@ -53,5 +55,22 @@ void isButtonPressed(){
 	}
 
 }
+void atFloor(){
 
-Void atFloor()
+        if (elev_get_floor_sensor_signal()==-1){
+        	intransition =1; 
+        }
+        else if (elev_get_floor_sensor_signal()!=-1){
+        	emFloorControl(elev_get_floor_sensor_signal());
+        	intransition=0;
+        }
+        
+ 
+}
+
+void ifStop(){ //bruke annet navn?
+    if (elev_get_stop_signal()==1){
+        emStopButton();
+
+    }
+}
