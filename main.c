@@ -7,6 +7,8 @@
 void newOrder( void );
 void atFloor(void);
 void ifStop(void);
+void startUp(void);
+void floorCheck(void);
 int PrevFloor=-1;
 
 
@@ -20,6 +22,9 @@ int main() {
         printf("Unable to initialize elevator hardware!\n");
         return 1;
     }
+
+    
+    startUp();
 
     printf("Press STOP button to stop elevator and exit program.\n");
     emprintshit();
@@ -74,3 +79,10 @@ void ifStop(){ //bruke annet navn?
 
     }
 }
+
+void startUp(void){ //Moves the elevator to a defined floor
+    while (elev_get_floor_sensor_signal()==-1){
+        elev_set_motor_direction(DIRN_DOWN);
+    }  
+}
+
