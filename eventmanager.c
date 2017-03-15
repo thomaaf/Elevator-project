@@ -20,6 +20,8 @@ static int Currentfloor;					//private variable, holds current floor
 int intransition;							//states if the elevator is in between two floors. 1 = true. 
 static int state; 							//orderstate: 1 = picking upwards orders. -1 = picking downwards orders. 0 = idle
 static int lastenginedir;					//Holds the last known engine direction. 1 = DIRN_UP.   -1 = DIRN_DOWN
+static int lastfloorpressed;
+static int lastbuttonpressed;
 
 
 void emQueueUpdater( int pressedFloor, int pressedButton ){ //updates the queue with new orderd
@@ -39,7 +41,12 @@ void emQueueUpdater( int pressedFloor, int pressedButton ){ //updates the queue 
 
 void emStatemachine (int pressedFloor, int pressedButton){
 	//printf("emStatemachine ( pressedFloor= %d , pressedButton = %d )",pressedFloor,pressedButton);
+	if ((pressedFloor==lastfloorpressed)&&(pressedButton==lastbuttonpressed)){
+		return;
+	}
 	if (state ==0){
+		lastfloorpressed=pressedFloor;
+		lastbuttonpressed=pressedButton;
 		if (pressedFloor>Currentfloor){
 			state = 1;
 		
@@ -120,6 +127,9 @@ void emStatemachine (int pressedFloor, int pressedButton){
 
 
 	else if(state ==1){
+		lastfloorpressed=pressedFloor;
+		lastbuttonpressed=pressedButton;
+
 		if ((pressedFloor>Currentfloor)&&((pressedButton== BUTTON_CALL_UP)||(pressedButton==BUTTON_COMMAND))){  //on the way upwards, sets orders upwards
 			CurrentDestination[pressedFloor]=1;
 		}
@@ -128,7 +138,7 @@ void emStatemachine (int pressedFloor, int pressedButton){
 				if ((CurrentDestination[x]==2)&&(pressedFloor<x)){	//Exeption case where theres a guy below the original dude who's going up
 					CurrentDestination[x]=1;
 					CurrentDestination[pressedFloor]=2;
-					break;
+					return;
 				}
 			}
 		}
@@ -140,13 +150,15 @@ void emStatemachine (int pressedFloor, int pressedButton){
 	}
 
 	else if (state==-1){
+		lastfloorpressed=pressedFloor;
+		lastbuttonpressed=pressedButton;
 		if ((pressedFloor>Currentfloor)&&(pressedButton==BUTTON_CALL_DOWN)){
 			for (int x=0; x<4; x++){
 				if ((CurrentDestination[x]==2)&&(pressedFloor>x)){	//Exeption case where theres a guy below the original dude who's going up
 					CurrentDestination[x]=1;
 					CurrentDestination[pressedFloor]=2;
 
-					break;
+					return;
 				}
 			}
 		}
@@ -156,9 +168,7 @@ void emStatemachine (int pressedFloor, int pressedButton){
 			
 		}
 		else if (pressedFloor==Currentfloor){
-
 			CurrentDestination[pressedFloor]=1;
-			emFloorControl(pressedFloor);
 
 
 		}
