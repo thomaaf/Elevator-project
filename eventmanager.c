@@ -20,13 +20,16 @@ static int Currentfloor;					//private variable, holds current floor
 int intransition;							//states if the elevator is in between two floors. 1 = true. 
 static int state; 							//orderstate: 1 = picking upwards orders. -1 = picking downwards orders. 0 = idle
 static int lastenginedir;					//Holds the last known engine direction. 1 = DIRN_UP.   -1 = DIRN_DOWN
-static int lastfloorpressed;
-static int lastbuttonpressed;
+static int lastfloorpressed=-1;
+static int lastbuttonpressed=-1;
 
 
 void emQueueUpdater( int pressedFloor, int pressedButton ){ //updates the queue with new orderd
 	if ((pressedFloor==Currentfloor)&&(intransition==0)){
 		emDoorControl(pressedFloor);
+		return;
+	}
+	if (list[pressedFloor][pressedButton]==1){
 		return;
 	}
 	list [pressedFloor][pressedButton]=1;					//sets new order, internal or external
@@ -41,10 +44,10 @@ void emQueueUpdater( int pressedFloor, int pressedButton ){ //updates the queue 
 
 void emStatemachine (int pressedFloor, int pressedButton){
 	
-	if (list[pressedFloor][pressedButton]==1){ 						//makes sure that only one order is recieved, by checking if ther's already a order for this floor
+	//if (list[lastfloorpressed][lastbuttonpressed]==1){ 						//makes sure that only one order is recieved, by checking if ther's already a order for this floor
 																	//If there's already an order stored, then the function extits, and no new information is written.
-		return;
-	}
+	//	return;
+	//}
 
 	if (state ==0){													//State=0 => Elevator is stationary
 		lastfloorpressed=pressedFloor;								//asserts that this order can only be called once.
@@ -115,19 +118,22 @@ void emStatemachine (int pressedFloor, int pressedButton){
 						CurrentDestination[pressedFloor]=2;			//We are going UP to pick up a person going DOWN. 2 marks the turning point.	
 					}
 				}
+				
 				return;
 
 			}
 			else{
-				printf("Exeption: Should be handled by QueueUpdater\n");
+				//printf("Exeption: Should be handled by QueueUpdater\n");
 				if (pressedFloor==0){								//These cases should be handled in QueueUpdater, and should therefore never happen
 					state=1; 
-					CurrentDestination[pressedFloor]=1;
+					//CurrentDestination[pressedFloor]=1;
+					emDoorControl(pressedFloor);
 
 				}
 				else if(pressedFloor==3){
 					state=-1;
-					CurrentDestination[pressedFloor]=1;
+					//CurrentDestination[pressedFloor]=1;
+					emDoorControl(pressedFloor);
 
 				}
 			}
@@ -152,18 +158,19 @@ void emStatemachine (int pressedFloor, int pressedButton){
 					return;
 				}
 			}
+			return;
 		}
 		else if (pressedFloor==Currentfloor){						//Should also be handled by Queuehandler; 
-			printf("Exeption: Should be handled by QueueUpdater; pressedFloor == Currentfloor, state = 1 \n");
-			//CurrentDestination[pressedFloor]=1;	
+			//printf("Exeption: Should be handled by QueueUpdater; pressedFloor == Currentfloor, state = 1 \n");
+			CurrentDestination[pressedFloor]=1;	
+			return;
 		}
-		printf("Exception: Has reached end of State == 1. Should exit before this.\n");
+		//printf("Exception: Has reached end of State == 1. Should exit before this.\n");
 		return;
 	}
 
 	else if (state==-1){											//state = -1 => Elevator is picking up people going DOWN.
-		lastfloorpressed=pressedFloor;								//asserts that this order can only be called once.
-		lastbuttonpressed=pressedButton;
+	
 
 		if ((pressedFloor>Currentfloor)&&(pressedButton==BUTTON_CALL_DOWN)){	//exeptioncase. The order is above current elevator position, Elevator needs to go UP to pick up
 			for (int x=0; x<4; x++){
@@ -173,16 +180,18 @@ void emStatemachine (int pressedFloor, int pressedButton){
 					return;
 				}
 			}
+			return;
 		}
 		else if((pressedFloor<Currentfloor)&&((pressedButton== BUTTON_CALL_DOWN)||(pressedButton==BUTTON_COMMAND))){  //Picking people who's going dwon. And these orders are below current location
 			CurrentDestination[pressedFloor]=1;
 			return;	
 		}
 		else if (pressedFloor==Currentfloor){
-			printf("Exeption: Should be handled by QueueUpdater; pressedFloor == Currentfloor, state =- 1 \n");
-			//CurrentDestination[pressedFloor]=1;
+			//printf("Exeption: Should be handled by QueueUpdater; pressedFloor == Currentfloor, state =- 1 \n");
+			CurrentDestination[pressedFloor]=1;
+			return;
 		}
-		printf("Exception: Has reached end of State == -1. Should exit before this.\n");
+		//printf("Exception: Has reached end of State == -1. Should exit before this.\n");
 		return;
 	}
 }
@@ -242,6 +251,7 @@ void emFloorControl(int newFloor){ 						//Updates the queue when/if and order h
 			*/
 
 
+
 		}
 	}
 }
@@ -264,7 +274,7 @@ void emSetEngine(int direction){
 
 	if (direction==DIRN_UP){
 		elev_set_motor_direction(DIRN_UP);
-		if(elev_get_floor_sensor_signal()==-1){
+		if(elev_get_floor_sensor_signal()!=-1){
 			lastenginedir=1;	
 		}
 		
@@ -272,7 +282,7 @@ void emSetEngine(int direction){
 	}
 	else if(direction==DIRN_DOWN){
 		elev_set_motor_direction(DIRN_DOWN);
-		if (elev_get_floor_sensor_signal()==-1){
+		if (elev_get_floor_sensor_signal()!=-1){
 			lastenginedir=-1;	
 		}
 		
@@ -292,6 +302,15 @@ void emDoorControl(int floor){
 	else if (state == -1){
 		lightsClearOrderButtonLight(floor, BUTTON_COMMAND);
 		lightsClearOrderButtonLight(floor, BUTTON_CALL_DOWN);
+	}
+	else if (state ==0){
+		lightsClearOrderButtonLight(floor, BUTTON_COMMAND);
+		lightsClearOrderButtonLight(floor, BUTTON_CALL_DOWN);
+		lightsClearOrderButtonLight(floor, BUTTON_CALL_UP);
+		CurrentDestination[Currentfloor]=0;
+		list[Currentfloor][BUTTON_COMMAND]=0;
+		list[Currentfloor][BUTTON_CALL_DOWN]=0;
+		list[Currentfloor][BUTTON_CALL_UP]=0;
 	}
 	
 	emSetEngine(DIRN_STOP);										//stops the engine at the floor
@@ -409,6 +428,16 @@ int emcheckForMoreOrder(){
 
 
 void emprintshit(){
+
+	for (int y=0; y<4; y++){
+		for (int x=0; x<3; x++){
+			printf("| %d",list[y][x] );
+			printf(" ");
+		}
+		printf("\n");
+
+	}
+	printf(" |\n");
 	printf("|----------------|\n");  //18 stk
 	printf("|");printf("lsdir: % d",lastenginedir); printf("       |\n");
 	printf("|----------------|\n");  //18 stk
