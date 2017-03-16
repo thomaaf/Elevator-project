@@ -1,5 +1,5 @@
 
-int intransition;	
+int intransition;
 
 
 void emQueueUpdater( int pressedFloor, int pressedButton );

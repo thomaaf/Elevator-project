@@ -35,6 +35,7 @@ void emQueueUpdater( int pressedFloor, int pressedButton ){ //updates the queue 
 	list [pressedFloor][pressedButton]=1;					//sets new order, internal or external
 	lightsSetOrderButtonLight(pressedFloor,pressedButton); 		//sets the lights of the pushed button
 										//prints the order list.
+	printf("queue\n");
 	emprintshit();
 	emStatemachine(pressedFloor, pressedButton);
 
@@ -124,18 +125,21 @@ void emStatemachine (int pressedFloor, int pressedButton){
 			}
 			else{
 				//printf("Exeption: Should be handled by QueueUpdater\n");
-				if (pressedFloor==0){								//These cases should be handled in QueueUpdater, and should therefore never happen
-					state=1; 
+				//if (pressedFloor==0){								//These cases should be handled in QueueUpdater, and should therefore never happen
+					//state=1; 
 					//CurrentDestination[pressedFloor]=1;
+					list[pressedFloor][pressedButton]=0;
 					emDoorControl(pressedFloor);
+					
+					printf("test\n");
 
-				}
-				else if(pressedFloor==3){
-					state=-1;
+				//}
+				//else if(pressedFloor==3){
+				//	state=-1;
 					//CurrentDestination[pressedFloor]=1;
-					emDoorControl(pressedFloor);
+				//	emDoorControl(pressedFloor);
 
-				}
+				//}
 			}
 		}
 		printf("Exception: Has reached end of State == 0. Should exit before this.\n");
@@ -151,18 +155,28 @@ void emStatemachine (int pressedFloor, int pressedButton){
 			return;
 		}
 		else if((pressedFloor<Currentfloor)&&(pressedButton==BUTTON_CALL_UP)){	//exeptioncase. The order is below current elevator position, Elevator needs to go down to pick up
+		
 			for (int x=0; x<4; x++){
 				if ((CurrentDestination[x]==2)&&(pressedFloor<x)){	//Checks if there's any more orders further below the current new order.
 					CurrentDestination[x]=1;						//if yes, then the found order should be reset to 1, and the new order should have the turningpoint and be = 2; 
 					CurrentDestination[pressedFloor]=2;				//Updates the destination list with the order
 					return;
 				}
+				//if (CurrentDestination[pressedFloor]!=2){
+				//	CurrentDestination[pressedFloor]=1;
+				//}
 			}
+
 			return;
 		}
 		else if (pressedFloor==Currentfloor){						//Should also be handled by Queuehandler; 
 			//printf("Exeption: Should be handled by QueueUpdater; pressedFloor == Currentfloor, state = 1 \n");
-			CurrentDestination[pressedFloor]=1;	
+			if (lastenginedir==-1){
+				CurrentDestination[pressedFloor]=1;
+			}
+			else if(lastenginedir==1){
+				CurrentDestination[pressedFloor]=2;
+			}
 			return;
 		}
 		//printf("Exception: Has reached end of State == 1. Should exit before this.\n");
@@ -188,7 +202,13 @@ void emStatemachine (int pressedFloor, int pressedButton){
 		}
 		else if (pressedFloor==Currentfloor){
 			//printf("Exeption: Should be handled by QueueUpdater; pressedFloor == Currentfloor, state =- 1 \n");
-			CurrentDestination[pressedFloor]=1;
+			if (lastenginedir==-1){
+				CurrentDestination[pressedFloor]=2;
+			}
+			else if(lastenginedir==1){
+				CurrentDestination[pressedFloor]=1;
+			}
+			
 			return;
 		}
 		//printf("Exception: Has reached end of State == -1. Should exit before this.\n");
@@ -213,6 +233,8 @@ void emFloorControl(int newFloor){ 						//Updates the queue when/if and order h
 				CurrentDestination[Currentfloor]=0;		//clears currentDestination orders
 				list[Currentfloor][BUTTON_COMMAND]=0;	//clears Listorders
 				list[Currentfloor][BUTTON_CALL_UP]=0;	//clears Listorders
+				printf("floorcontrol state =1\n");
+
 				emprintshit();							//Prints shit
 
 				
@@ -237,6 +259,7 @@ void emFloorControl(int newFloor){ 						//Updates the queue when/if and order h
 				CurrentDestination[Currentfloor]=0;
 				list[Currentfloor][BUTTON_COMMAND]=0;
 				list[Currentfloor][BUTTON_CALL_DOWN]=0;
+				printf("floorcontrol state =-1\n");
 				emprintshit();
 
 			}
@@ -267,6 +290,7 @@ void queuecheck(){						//Checks the main queue list for any more orders that ha
 		}
 	}
 	printf("queue done \n");
+
 	emprintshit();
 }
 
@@ -339,6 +363,7 @@ void emStopButton(){
 	
 	elev_set_stop_lamp(0);					
 	state=0;
+	printf("stop button =1\n");
 	emprintshit();
 
 	//exits and reinitiates normal operating mode
@@ -384,6 +409,9 @@ int emcheckSpecialCase( ){
 	if (state == 1){							//if the state is = 1, and there's and order labeled 2, then the elevaotr should proceed DOWWN
 		for (int x=0; x<4; x++){
 			if (CurrentDestination[x]==2){		
+				//if (lastenginedir==1){
+				//	return 0;
+				//}
 				emSetEngine(DIRN_DOWN);
 				return 1;
 			}
@@ -392,6 +420,9 @@ int emcheckSpecialCase( ){
 	else if(state == -1){						//if the state is = -1, and there's and order labeled 2, then the elevaotr should proceed UP
 		for (int x=0; x<4; x++ ){
 			if (CurrentDestination[x]==2){
+				//if (lastenginedir==-1){
+				//	return 0;
+				//}
 				emSetEngine(DIRN_UP);
 				return 1;
 			}
@@ -403,6 +434,7 @@ int emcheckSpecialCase( ){
 int emcheckForMoreOrder(){
 	if (state == 1){							//if the state is = 1, and there's and order labeled 1, then the elevaotr should proceed UP
 		for (int x = 0 ; x<4; x++ ){ 			
+			
 			if (CurrentDestination[x]==1){
 				emSetEngine(DIRN_UP);
 				return 1;
@@ -420,6 +452,7 @@ int emcheckForMoreOrder(){
 		}
 	}
 	state =0;
+	printf("check for more orders = return 0\n");
 	emprintshit();
 	queuecheck(); //if there's no orders in CUrrentdestination, then we need to check for new order, and "restart" the elevator to state =0 
 	return 0;

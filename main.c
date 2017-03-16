@@ -16,6 +16,7 @@ int PrevFloor=-1;
 
 
 
+
 int main() {
     // Initialize hardware
     if (!elev_init()) {
@@ -38,12 +39,14 @@ int main() {
     	atFloor();
         ifStop();
         emCheckTimer();
+        
   
 
     }
 
     return 0;
 }
+
 
 
 void newOrder(){
