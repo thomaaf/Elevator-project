@@ -2,7 +2,7 @@
 int intransition;
 
 
-void emQueueUpdater( int pressed_floor, int pressed_button );
+void emQueueUpdater( int pressedFloor, int pressedButton );
 
 void emFloorControl(int newFloor);
 void queuecheck();

@@ -1,3 +1,3 @@
 
 
-void finite_state_machine (int pressed_floor, int pressed_button);
+void finite_state_machine (int pressedFloor, int pressedButton);
