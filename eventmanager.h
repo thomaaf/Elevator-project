@@ -2,8 +2,8 @@
 int intransition;
 
 
-void emQueueUpdater( int pressedFloor, int pressedButton );
-void emStatemachine (int pressedFloor, int pressedButton);
+void emQueueUpdater( int pressed_floor, int pressed_button );
+
 void emFloorControl(int newFloor);
 void queuecheck();
 void emSetEngine(int direction);
